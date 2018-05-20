@@ -64,9 +64,10 @@ public class Marmot extends Application {
         primaryStage.setY((primaryScreenBounds.getHeight() - primaryStage.getHeight())/2);  
  
         // F11 to toggle fullscreen mode
-        myScene.getAccelerators().put(new KeyCodeCombination(KeyCode.F11), () -> {
-            mainStage.setFullScreen(mainStage.fullScreenProperty().not().get());
-        });
+        // Broken due to a JDK bug not fixed until 9
+//        myScene.getAccelerators().put(new KeyCodeCombination(KeyCode.F11), () -> {
+//            mainStage.setFullScreen(mainStage.fullScreenProperty().not().get());
+//        });
         
 //        // Icons
 //        String[] sizes = {"256","128","64","48","32"};
