@@ -29,7 +29,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -51,7 +54,11 @@ public class FXMLmarmotController{
     @FXML private GridPane rootGridPane;
     @FXML private Button loadButton;
     @FXML private TextField bibTextField;
+    @FXML private Label resultLabel;
     @FXML private Label participantCountLabel;
+    @FXML private Button clearListButton;
+    @FXML private Spinner<Integer> fontSizeSpinner;
+    @FXML private ToggleButton fullScreenToggleButton;
     
     @FXML private ListView<Participant> finisherListView;
     
@@ -64,7 +71,7 @@ public class FXMLmarmotController{
     
     Integer baseFontSize = 36;
     
-    Stage primaryStage;
+    Stage primaryStage = Marmot.getInstance().getPrimaryStage();
     /**
      * Initializes the controller class.
      */
@@ -73,29 +80,61 @@ public class FXMLmarmotController{
         loadButton.setOnAction((ActionEvent event) -> {
             loadParticipants();
         });
+        
+        clearListButton.setOnAction((ActionEvent event) -> {
+            displayedParticipantsList.clear();
+        });
         participantCountLabel.setText("0");
         finisherListView.setItems(displayedParticipantsList);
         bibTextField.setOnAction((event) -> {
             showParticipant();
         });
+        
+        // if the bib text field looses focus, pull it back
+        bibTextField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if(newVal.equals(false)){
+                if (!participantMap.isEmpty()) 
+                    Platform.runLater(() -> bibTextField.requestFocus());
+            }
+        });
+        
+        primaryStage.fullScreenProperty().addListener((obs, oldVal, newVal) -> {
+            fullScreenToggleButton.setSelected(newVal);
+        });
+        fullScreenToggleButton.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (primaryStage.fullScreenProperty().get() != newVal)
+                primaryStage.setFullScreen(newVal);
+        });
 
         finisherListView.setStyle("-fx-font-size:" + baseFontSize.toString() + ";");
         
-        Platform.runLater(() -> {
-            System.out.println("Adding Accelerators");
-            primaryStage = Marmot.getInstance().getPrimaryStage();
-            primaryStage.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN), () -> {
-                baseFontSize++;
-                System.out.println("Font size is now " + baseFontSize.toString());
-                finisherListView.setStyle("-fx-font-size:" + baseFontSize.toString() + ";");
-            });
-            primaryStage.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN), () -> {
-                baseFontSize--;
-                if (baseFontSize < 8) baseFontSize = 8;
-                System.out.println("Font size is now " + baseFontSize.toString());
-                finisherListView.setStyle("-fx-font-size:" + baseFontSize.toString() + ";");
-            });
-            System.out.println(primaryStage.getScene().getAccelerators().size() + " Accelerators");
+//        Broken due to a JDK bug not fixed until 9
+//        Platform.runLater(() -> {
+//            System.out.println("Adding Accelerators");
+//            primaryStage = Marmot.getInstance().getPrimaryStage();
+//            primaryStage.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN), () -> {
+//                baseFontSize++;
+//                if (baseFontSize < 99) baseFontSize = 99;
+//                System.out.println("Font size is now " + baseFontSize.toString());
+//                updateFontSize();
+//                
+//            });
+//            primaryStage.getScene().getAccelerators().put(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN), () -> {
+//                baseFontSize--;
+//                if (baseFontSize < 8) baseFontSize = 8;
+//                System.out.println("Font size is now " + baseFontSize.toString());
+//                updateFontSize();
+//            });
+//            System.out.println(primaryStage.getScene().getAccelerators().size() + " Accelerators");
+//        });
+        
+        fontSizeSpinner.setStyle("-fx-font-size: 18;");
+        fontSizeSpinner.getStyleClass().add(Spinner.STYLE_CLASS_SPLIT_ARROWS_HORIZONTAL);
+        fontSizeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(14,99,baseFontSize));
+        fontSizeSpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
+            System.out.println("New spinner value: "+newValue);
+            baseFontSize=newValue;
+            updateFontSize();
         });
         
         finisherListView.setCellFactory(param -> new ListCell<Participant>() {
@@ -122,6 +161,7 @@ public class FXMLmarmotController{
                     
                     bib.setText("  (" + to.getBib() +")");
                     fullName.textProperty().bind(to.fullNameProperty());
+                    fullName.setStyle("-fx-font-weight: bold;");
                     nameHBox.setSpacing(5);
                     nameHBox.getChildren().setAll(fullName,bib);
                     
@@ -160,11 +200,17 @@ public class FXMLmarmotController{
                } 
                displayedParticipantsList.add(0, p);
                System.out.println("Added " + bib + " -> " + p.toString());
+               resultLabel.setText("");
            } else {
-               //errorLabel.setText("Bib " + bib + " not found"); 
+               resultLabel.setText("Bib " + bib + " not found"); 
            }
            bibTextField.setText("");
        }
+    }
+    
+    private void updateFontSize(){
+        //fontSizeSpinner.getValueFactory().setValue(baseFontSize);
+        finisherListView.setStyle("-fx-font-size:" + baseFontSize.toString() + ";");
     }
     
     private void loadParticipants()  {
