@@ -9,7 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import javafx.beans.Observable;
-import javafx.beans.binding.StringBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,6 +16,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.util.Callback;
+import org.json.JSONObject;
 
 /**
  *
@@ -27,15 +27,16 @@ public class Participant {
     private final StringProperty middleNameProperty= new SimpleStringProperty();
     private final StringProperty lastNameProperty= new SimpleStringProperty("");
     private final StringProperty fullNameProperty= new SimpleStringProperty();
-    private final StringProperty emailProperty= new SimpleStringProperty(); 
     private final StringProperty bibProperty= new SimpleStringProperty();
     private final IntegerProperty ageProperty = new SimpleIntegerProperty();
     private final StringProperty sexProperty= new SimpleStringProperty(); 
     private final StringProperty cityProperty= new SimpleStringProperty();
     private final StringProperty stateProperty= new SimpleStringProperty();
     private final StringProperty countryProperty= new SimpleStringProperty();
-    private final StringProperty zipProperty = new SimpleStringProperty();
     private final StringProperty noteProperty = new SimpleStringProperty();
+    private final StringProperty timeProperty = new SimpleStringProperty();
+    private final StringProperty crProperty = new SimpleStringProperty();
+    
 
     
     ObservableMap attributeMap =  FXCollections.observableHashMap();
@@ -70,45 +71,40 @@ public class Participant {
         attribMap.put("sex-gender", "Sex");
         attribMap.put("city", "City");
         attribMap.put("state", "State");
-        attribMap.put("zip","Zip Code");
         attribMap.put("country", "Country");
         attribMap.put("status","Status");
         attribMap.put("note","Note");
-        attribMap.put("email", "EMail");
         // TODO: routine to add custom attributes based on db lookup
         return attribMap; 
     }
-        public void setAttributes(Map<String, String> attribMap) {
-        // bulk set routine. Everything is a string so convert as needed
+    
+    public void setAttributes(Map<String, String> attribMap) {
+    // bulk set routine. Everything is a string so convert as needed
         
         attribMap.entrySet().stream().forEach((Map.Entry<String, String> entry) -> {
             if (entry.getKey() != null) {
                 System.out.println("processing " + entry.getKey() + " -> " + entry.getValue());
-             switch(entry.getKey()) {
-                 case "bib": this.setBib(entry.getValue()); break; 
-                 case "first": this.setFirstName(entry.getValue()); break;
-                 case "middle": this.setMiddleName(entry.getValue()); break;
-                 case "last": this.setLastName(entry.getValue()); break;
-                 case "age": 
-                     //Setting the birthdate will also set the age, so if the age is already set just skip it.
-                     try {
-                        this.setAge(Integer.parseUnsignedInt(entry.getValue())); 
-                     } catch (Exception e) {
-                         System.out.println("Unable to parse age " + entry.getValue() );
-                     }
-                     break; 
-                     
-                 // TODO: map to selected sex translator
-                 case "sex-gender": this.setSex(entry.getValue()); break; 
-                 case "city": this.setCity(entry.getValue()); break; 
-                 case "state": this.setState(entry.getValue()); break; 
-                 case "country": this.setCountry(entry.getValue()); break;
-                 case "zip": this.setZip(entry.getValue()); break;
-                 
-                 case "note": this.setNote(entry.getValue()); break;
+                switch(entry.getKey()) {
+                    case "bib": this.setBib(entry.getValue()); break; 
+                    case "first": this.setFirstName(entry.getValue()); break;
+                    case "middle": this.setMiddleName(entry.getValue()); break;
+                    case "last": this.setLastName(entry.getValue()); break;
+                    case "age": 
+                        //Setting the birthdate will also set the age, so if the age is already set just skip it.
+                        try {
+                           this.setAge(Integer.parseUnsignedInt(entry.getValue())); 
+                        } catch (Exception e) {
+                            System.out.println("Unable to parse age " + entry.getValue() );
+                        }
+                        break; 
 
-                 
-             }
+                    // TODO: map to selected sex translator
+                    case "sex-gender": this.setSex(entry.getValue()); break; 
+                    case "city": this.setCity(entry.getValue()); break; 
+                    case "state": this.setState(entry.getValue()); break; 
+                    case "country": this.setCountry(entry.getValue()); break;
+                    case "note": this.setNote(entry.getValue()); break;
+                 }
             }
         });
         
@@ -153,17 +149,7 @@ public class Participant {
     public StringProperty fullNameProperty(){
         return fullNameProperty;
     }
-    
-    public String getEmail() {
-        return emailProperty.getValueSafe();
-    }
-    public void setEmail(String fName) {
-        emailProperty.setValue(fName);
-    }
-    public StringProperty emailProperty() {
-        return emailProperty; 
-    }
-   
+      
     public Integer getAge () {
         return ageProperty.getValue();
     }
@@ -210,16 +196,6 @@ public class Participant {
         return stateProperty;
     }
     
-    public String getZip() {
-        return zipProperty.getValueSafe();
-    }
-    public void setZip(String s) {
-        zipProperty.setValue(s);
-    }
-    public StringProperty zipProperty(){
-        return zipProperty;
-    }
-    
     public String getCountry() {
         return countryProperty.getValueSafe();
     }
@@ -240,10 +216,29 @@ public class Participant {
         return noteProperty;
     }        
     
+    public String getTime() {
+        return timeProperty.getValueSafe();
+    }
+    public void setTime(String s) {
+        timeProperty.setValue(s);
+    }
+    public StringProperty timeProperty(){
+        return timeProperty;
+    }
+    
+    public String getCR() {
+        return crProperty.getValueSafe();
+    }
+    public void setCR(String s) {
+        crProperty.setValue(s);
+    }
+    public StringProperty crProperty(){
+        return crProperty;
+    }
     
     
     public static Callback<Participant, Observable[]> extractor() {
-        return (Participant p) -> new Observable[]{p.firstNameProperty,p.middleNameProperty,p.lastNameProperty,p.bibProperty,p.ageProperty,p.sexProperty,p.cityProperty,p.stateProperty,p.countryProperty};
+        return (Participant p) -> new Observable[]{p.firstNameProperty,p.middleNameProperty,p.lastNameProperty,p.bibProperty,p.ageProperty,p.sexProperty,p.cityProperty,p.stateProperty,p.countryProperty,p.crProperty,p.timeProperty};
     }
 
     @Override
@@ -265,10 +260,35 @@ public class Participant {
             return false;
         }
         final Participant other = (Participant) obj;
-        if (!Objects.equals(this.bibProperty.getValue(),other.bibProperty.getValue())) {
-            return false; 
-        }
-        return true;
+        return Objects.equals(this.bibProperty.getValue(),other.bibProperty.getValue());
+    }
+
+    void setFromJSON(JSONObject jsonObject) {
+        jsonObject.toMap().keySet().forEach(k -> {
+            switch(k) {
+                case "Bib": this.setBib(jsonObject.optString(k)); break; 
+                case "FirstName": this.setFirstName(jsonObject.optString(k)); break;
+                case "MiddleName": this.setMiddleName(jsonObject.optString(k)); break;
+                case "LastName": this.setLastName(jsonObject.optString(k)); break;
+                case "Age": 
+                    try {
+                       this.setAge(Integer.parseUnsignedInt(jsonObject.optString(k))); 
+                    } catch (Exception e) {
+                        System.out.println("Unable to parse age " + jsonObject.optString(k) );
+                    }
+                    break; 
+
+                // TODO: map to selected sex display
+                case "Sex": this.setSex(jsonObject.optString(k)); break; 
+                case "City": this.setCity(jsonObject.optString(k)); break; 
+                case "State": this.setState(jsonObject.optString(k)); break; 
+                case "Country": this.setCountry(jsonObject.optString(k)); break;
+                case "Note": this.setNote(jsonObject.optString(k)); break;
+                 
+             }
+            
+        });
+
     }
     
 }
