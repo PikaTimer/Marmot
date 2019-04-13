@@ -16,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
@@ -26,12 +27,15 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -87,6 +91,8 @@ public class FXMLmarmotController{
     Integer partcicipantCount = 0;
     
     Integer baseFontSize = 36;
+    
+    EventWebSocketClient eventsClient;
     
     Stage primaryStage = Marmot.getInstance().getPrimaryStage();
     /**
@@ -238,7 +244,7 @@ public class FXMLmarmotController{
                     byte[] packetData = "DISCOVER_PIKA_REQUEST".getBytes();
                     
                     Boolean pikaFound = false;
-                    String pikaURL = "";
+                    StringProperty pikaURL = new SimpleStringProperty();
                     // Find the server using UDP broadcast
                     //Loop while the dialog box is open
                     // UDP Broadcast code borrowed from https://michieldemey.be/blog/network-discovery-using-udp-broadcast/
@@ -293,7 +299,7 @@ public class FXMLmarmotController{
                                     
                                     System.out.println("Pika Finder Response: " + receivePacket.getAddress().getHostAddress() + " " + message);
                                     pikaFound=true;
-                                    pikaURL=message;
+                                    pikaURL.set(message);
                                     Platform.runLater(() -> {
                                         autoSyncToggleSwitch.disableProperty().set(true);
                                         autoSyncLabel.setText("Syncing with \n" + message);
@@ -312,7 +318,7 @@ public class FXMLmarmotController{
                     if (autoSyncStatus.get()) {                   
                         try {
 
-                            URL url = new URL(pikaURL + "/participants/");//your url i.e fetch data from .
+                            URL url = new URL(pikaURL.getValue() + "/participants/");//your url i.e fetch data from .
                             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                             conn.setRequestMethod("GET");
                             //conn.setRequestProperty("Accept", "application/json");
@@ -340,7 +346,15 @@ public class FXMLmarmotController{
                                 partcicipantCount++;
                                 Platform.runLater(() -> {participantCountLabel.setText(partcicipantCount.toString());});
                             }
-
+                            
+                            // Start listening for events....
+                            String wsPikaURL = pikaURL.getValue().replace("http://", "ws://") + "/eventsocket/";
+                            System.out.println("Connecting to wsPikaURL: " + wsPikaURL);
+                            eventsClient = new EventWebSocketClient(new URI(wsPikaURL), participantMap);
+                            eventsClient.connectBlocking(10, TimeUnit.SECONDS);
+                            Platform.runLater(() -> {
+                                if (eventsClient.isOpen()) autoSyncLabel.setText("Connected to\n" + pikaURL.getValue());
+                            });
 
                         } catch (Exception e) {
                             System.out.println("Exception in NetClientGet:- " + e);
@@ -354,6 +368,10 @@ public class FXMLmarmotController{
         scanner.setDaemon(true);
         scanner.setName("Pika Scanner");
         scanner.start();
+    }
+    
+    private void setupEventListener(String url){
+        
     }
            
     private void showParticipant(){
