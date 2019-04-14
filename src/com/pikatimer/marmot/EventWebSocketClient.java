@@ -27,6 +27,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
@@ -37,17 +38,21 @@ import org.json.JSONObject;
 
 public class EventWebSocketClient extends WebSocketClient {
 
-    Map<String,Participant> participantMap;
+    private static Map<String,Participant> participantMap;
+    private static ObservableList<Participant> displayedParticipantsList;
     
     public EventWebSocketClient(URI serverUri, Draft draft, Map<String,Participant> p) {
             super(serverUri, draft);
             participantMap = p;
     }
 
-    public EventWebSocketClient(URI serverURI, Map<String,Participant> p) {
+    public EventWebSocketClient(URI serverURI, Map<String,Participant> p, ObservableList<Participant> l) {
             super(serverURI);
             participantMap = p;
+            displayedParticipantsList = l;
     }
+
+
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
@@ -80,7 +85,22 @@ public class EventWebSocketClient extends WebSocketClient {
                             System.out.println("Added: " + p.getBib() + " -> " + p.fullNameProperty().getValueSafe());
                         }
                         ; break;
-                    
+                    case "ANNOUNCER":
+                        String bib = json.optString(k);
+                        if (! bib.isEmpty() && participantMap.containsKey(bib)) {
+                            if(participantMap.containsKey(bib)) {
+                                Participant part = participantMap.get(bib);
+                                Platform.runLater(() -> {
+                                    if (! displayedParticipantsList.contains(part)){
+                                        displayedParticipantsList.add(0, part);
+                                    } 
+                                });
+                                System.out.println("Added " + bib + " -> " + part.toString());
+                            }
+                            
+                        } else {
+                            System.out.println("Unknown bib " + bib);
+                        }
                 }
                 
             });

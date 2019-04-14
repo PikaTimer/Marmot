@@ -85,7 +85,7 @@ public class FXMLmarmotController{
     
     Preferences prefs = Preferences.userRoot().node("PikaTimer");
     
-    ObservableList displayedParticipantsList = FXCollections.observableArrayList();
+    ObservableList<Participant> displayedParticipantsList = FXCollections.observableArrayList();
     Map<String,Participant> participantMap = new HashMap();
     
     Integer partcicipantCount = 0;
@@ -350,7 +350,7 @@ public class FXMLmarmotController{
                             // Start listening for events....
                             String wsPikaURL = pikaURL.getValue().replace("http://", "ws://") + "/eventsocket/";
                             System.out.println("Connecting to wsPikaURL: " + wsPikaURL);
-                            eventsClient = new EventWebSocketClient(new URI(wsPikaURL), participantMap);
+                            eventsClient = new EventWebSocketClient(new URI(wsPikaURL), participantMap, displayedParticipantsList);
                             eventsClient.connectBlocking(10, TimeUnit.SECONDS);
                             Platform.runLater(() -> {
                                 if (eventsClient.isOpen()) autoSyncLabel.setText("Connected to\n" + pikaURL.getValue());
