@@ -40,6 +40,7 @@ public class EventWebSocketClient extends WebSocketClient {
 
     private static Map<String,Participant> participantMap;
     private static ObservableList<Participant> displayedParticipantsList;
+    private Integer messageCounter = 0;
     
     public EventWebSocketClient(URI serverUri, Draft draft, Map<String,Participant> p) {
             super(serverUri, draft);
@@ -66,7 +67,7 @@ public class EventWebSocketClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        System.out.println("Received message: " + message);
+        System.out.println("Received message #" + messageCounter++ + ": " + message);
         try {
             JSONObject json = new JSONObject(message);
             json.keySet().forEach(k -> {
