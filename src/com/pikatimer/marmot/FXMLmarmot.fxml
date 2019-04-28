@@ -29,7 +29,7 @@
          <children>
             <VBox alignment="CENTER">
                <children>
-                  <HBox alignment="CENTER" spacing="3.0">
+                  <HBox alignment="CENTER" spacing="3.0" VBox.vgrow="NEVER">
                      <children>
                         <Label fx:id="participantCountLabel" text="0">
                            <font>
@@ -59,7 +59,7 @@
                   </HBox>
                   <Label fx:id="resultLabel" maxWidth="1.7976931348623157E308">
                      <font>
-                        <Font size="18.0" />
+                        <Font name="System Bold" size="14.0" />
                      </font></Label>
                </children>
             </VBox>

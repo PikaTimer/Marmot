@@ -35,6 +35,7 @@ public class Participant {
     private final StringProperty countryProperty= new SimpleStringProperty();
     private final StringProperty noteProperty = new SimpleStringProperty();
     private final StringProperty timeProperty = new SimpleStringProperty();
+    private final StringProperty raceProperty = new SimpleStringProperty();
     private final StringProperty crProperty = new SimpleStringProperty();
     
 
@@ -160,6 +161,13 @@ public class Participant {
         return ageProperty; 
     }
     
+    public StringProperty timeProperty(){
+        return timeProperty;
+    }
+    public StringProperty raceProperty(){
+        return raceProperty;
+    }
+    
     
     public String getSex() {
         return sexProperty.getValueSafe();
@@ -216,16 +224,7 @@ public class Participant {
         return noteProperty;
     }        
     
-    public String getTime() {
-        return timeProperty.getValueSafe();
-    }
-    public void setTime(String s) {
-        timeProperty.setValue(s);
-    }
-    public StringProperty timeProperty(){
-        return timeProperty;
-    }
-    
+       
     public String getCR() {
         return crProperty.getValueSafe();
     }
@@ -236,6 +235,10 @@ public class Participant {
         return crProperty;
     }
     
+    public void setRaceTime(String race, String time){
+        raceProperty.set(race);
+        timeProperty.set(time);
+    }
     
     public static Callback<Participant, Observable[]> extractor() {
         return (Participant p) -> new Observable[]{p.firstNameProperty,p.middleNameProperty,p.lastNameProperty,p.bibProperty,p.ageProperty,p.sexProperty,p.cityProperty,p.stateProperty,p.countryProperty,p.crProperty,p.timeProperty};

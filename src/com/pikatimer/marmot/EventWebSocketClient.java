@@ -72,8 +72,21 @@ public class EventWebSocketClient extends WebSocketClient {
             JSONObject json = new JSONObject(message);
             json.keySet().forEach(k -> {
                 System.out.println("JSON Key: " + k);
-                
+                String bib;
                 switch(k) {
+                    case "RESULT": 
+                        JSONObject result = json.getJSONObject(k);
+                        bib = result.optString("Bib");
+                        String race = result.optString("Race");
+                        String time = result.optString("Time");
+                        if (participantMap.containsKey(bib)) {
+                            // update on the FX thread to avoid concurrent update issues. 
+                            Platform.runLater( () -> participantMap.get(bib).setRaceTime(race,time));
+                            System.out.println("Updated: " + bib  + " -> " + race + " -> " + time);
+                        } else {
+                            System.out.println("Result from unknown bib" + bib + " -> " + race + " -> " + time);
+                        }
+                        ; break;
                     case "PARTICIPANT": 
                         Participant p = new Participant(); 
                         p.setFromJSON(json.getJSONObject(k));
@@ -87,7 +100,7 @@ public class EventWebSocketClient extends WebSocketClient {
                         }
                         ; break;
                     case "ANNOUNCER":
-                        String bib = json.optString(k);
+                        bib = json.optString(k);
                         if (! bib.isEmpty() && participantMap.containsKey(bib)) {
                             if(participantMap.containsKey(bib)) {
                                 Participant part = participantMap.get(bib);

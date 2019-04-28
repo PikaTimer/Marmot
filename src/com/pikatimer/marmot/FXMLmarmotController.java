@@ -169,11 +169,16 @@ public class FXMLmarmotController{
             Label state = new Label("");
             Label country = new Label("");
             Label time = new Label("");
+            Label race = new Label("");
             Label note = new Label("");
+            Label t = new Label("Time:");
             
             VBox toVBox = new VBox();
             HBox nameHBox = new HBox();
             HBox detailsHBox = new HBox();
+            HBox timeHBox = new HBox();
+            
+            
             
             @Override
             protected void updateItem(Participant to, boolean empty) {
@@ -183,7 +188,7 @@ public class FXMLmarmotController{
                     setText(null);
                     setGraphic(null);
                 } else {
-                    
+                    toVBox.setSpacing (0);
                     bib.setText("  (" + to.getBib() +")");
                     fullName.textProperty().bind(to.fullNameProperty());
                     fullName.setStyle("-fx-font-weight: bold;");
@@ -196,16 +201,24 @@ public class FXMLmarmotController{
                     age.textProperty().bind(to.ageProperty().asString());
                     sex.textProperty().bind(to.sexProperty());
                     note.textProperty().bind(to.noteProperty());
+                    time.textProperty().bind(to.timeProperty());
+                    race.textProperty().bind(to.raceProperty());
+                    note.textProperty().bind(to.noteProperty());
 
-                    detailsHBox.setSpacing(5);
+                    detailsHBox.setSpacing(8);
                     detailsHBox.getChildren().setAll(city, state, country);
-
                     
-                    if (to.getNote().isEmpty()) toVBox.getChildren().setAll(nameHBox,detailsHBox);
-                    else {
-                        note.setText(to.getNote());
-                        toVBox.getChildren().setAll(nameHBox,detailsHBox,note);
-                    }
+                    timeHBox.setSpacing(8);
+                    timeHBox.getChildren().setAll(t,race,time);
+                    timeHBox.managedProperty().bind(time.textProperty().isEmpty().not());
+                    timeHBox.visibleProperty().bind(time.textProperty().isEmpty().not());
+                    timeHBox.setStyle("-fx-font-weight: bold;");
+                    
+                    note.managedProperty().bind(note.textProperty().isEmpty().not());
+                    note.visibleProperty().bind(note.textProperty().isEmpty().not());
+                    
+                    toVBox.getChildren().setAll(nameHBox,timeHBox,detailsHBox,note);
+                    
                     
                     setText(null);
                     setGraphic(toVBox);
