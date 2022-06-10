@@ -339,7 +339,7 @@ public class FXMLmarmotController{
                                 throw new RuntimeException("Failed : HTTP Error code : "
                                         + conn.getResponseCode());
                             }
-                            InputStreamReader in = new InputStreamReader(conn.getInputStream());
+                            InputStreamReader in = new InputStreamReader(conn.getInputStream(),"UTF-8");
                             BufferedReader br = new BufferedReader(in);
                             String output;
                             String fullResponse="";
