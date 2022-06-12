@@ -24,13 +24,13 @@ package com.pikatimer.marmot;
 
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 
@@ -41,16 +41,22 @@ public class EventWebSocketClient extends WebSocketClient {
     private static Map<String,Participant> participantMap;
     private static ObservableList<Participant> displayedParticipantsList;
     private Integer messageCounter = 0;
+    private FXMLmarmotController marmotController;
+    private String wsURI;
     
-    public EventWebSocketClient(URI serverUri, Draft draft, Map<String,Participant> p) {
-            super(serverUri, draft);
-            participantMap = p;
-    }
 
     public EventWebSocketClient(URI serverURI, Map<String,Participant> p, ObservableList<Participant> l) {
             super(serverURI);
             participantMap = p;
             displayedParticipantsList = l;
+    }
+
+    EventWebSocketClient(String ws, Map<String, Participant> p, ObservableList<Participant> l, FXMLmarmotController mc) throws URISyntaxException {
+            super(new URI(ws));
+            wsURI = ws;
+            participantMap = p;
+            displayedParticipantsList = l;
+            marmotController = mc;
     }
 
 
@@ -63,6 +69,7 @@ public class EventWebSocketClient extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
             System.out.println("closed with exit code " + code + " additional info: " + reason);
+            marmotController.startEventListener(wsURI);
     }
 
     @Override

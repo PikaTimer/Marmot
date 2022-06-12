@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
@@ -28,6 +29,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
@@ -56,6 +59,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.controlsfx.control.ToggleSwitch;
 import org.h2.tools.Csv;
+import org.java_websocket.WebSocket;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -92,7 +96,7 @@ public class FXMLmarmotController{
     
     Integer baseFontSize = 36;
     
-    EventWebSocketClient eventsClient;
+    EventWebSocketClient eventClient;
     
     Stage primaryStage = Marmot.getInstance().getPrimaryStage();
     /**
@@ -363,11 +367,7 @@ public class FXMLmarmotController{
                             // Start listening for events....
                             String wsPikaURL = pikaURL.getValue().replace("http://", "ws://") + "/eventsocket/";
                             System.out.println("Connecting to wsPikaURL: " + wsPikaURL);
-                            eventsClient = new EventWebSocketClient(new URI(wsPikaURL), participantMap, displayedParticipantsList);
-                            eventsClient.connectBlocking(10, TimeUnit.SECONDS);
-                            Platform.runLater(() -> {
-                                if (eventsClient.isOpen()) autoSyncLabel.setText("Connected to\n" + pikaURL.getValue());
-                            });
+                            startEventListener(wsPikaURL);
 
                         } catch (Exception e) {
                             System.out.println("Exception in NetClientGet:- " + e);
@@ -385,6 +385,21 @@ public class FXMLmarmotController{
     
     private void setupEventListener(String url){
         
+    }
+    
+    public void startEventListener(String wsPikaURL){
+        try {
+            // Start listening for events....
+            System.out.println("Connecting to wsPikaURL: " + wsPikaURL);
+            eventClient = new EventWebSocketClient(wsPikaURL, participantMap, displayedParticipantsList, this);
+            eventClient.connectBlocking(60, TimeUnit.SECONDS);
+            
+            Platform.runLater(() -> {
+                if (eventClient.isOpen()) autoSyncLabel.setText("Connected to\n" + wsPikaURL);
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(FXMLmarmotController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
            
     private void showParticipant(){
