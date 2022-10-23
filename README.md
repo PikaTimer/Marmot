@@ -7,10 +7,12 @@
 * Launch the Marmot application
 
 ## There are two modes of operation:
-###Manual: 
+
+### Manual: 
 * Load participants CSV file via the "Load Participants" button or
 * Type bib number into 'Bib' Text field, hitting return to accept and display the result
-###Automatic: 
+
+### Automatic: 
 * Use the Auto-Sync button to automatically  participant data from 
 PikaTimer v1.6+ running on the local network.
 * System will automatically load the participants information and keep updates in sync.
