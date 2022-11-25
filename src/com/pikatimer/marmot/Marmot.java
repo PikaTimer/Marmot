@@ -6,14 +6,14 @@
 package com.pikatimer.marmot;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.Pane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 
 /**
@@ -25,7 +25,7 @@ public class Marmot extends Application {
     private static Stage mainStage;
 
     
-    public static final String VERSION = "1.5";
+    public static final String VERSION = "1.1";
     
     /**
     * SingletonHolder is loaded on the first execution of Singleton.getInstance() 
@@ -76,6 +76,10 @@ public class Marmot extends Application {
 //            primaryStage.getIcons().add(new Image("resources/icons/Pika_"+s+".png"));
 //        }
         
+        primaryStage.setOnCloseRequest((WindowEvent t) -> {
+            Platform.exit();
+            System.exit(0);
+        });
         
         primaryStage.setScene(myScene);
         primaryStage.show();
